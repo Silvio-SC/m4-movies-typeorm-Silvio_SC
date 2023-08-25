@@ -1,27 +1,34 @@
 import { Movie } from "../entities";
-import { Repository } from "typeorm";
-import { AppDataSource } from "../data_source";
-import { MovieUpdate, MoviesCreate } from "../interface";
-
+import { MovieRead, MovieUpdate, MoviesCreate, PaginationParams } from "../interface";
+import { movieCreateSchema, movieUpdateSchema } from "../schemas";
+import { moviesRepo } from "../repositories";
 
 const createMovie = async (payload: MoviesCreate): Promise<Movie> => {
-    const repo: Repository<Movie> = AppDataSource.getRepository(Movie)
-    return await repo.save(payload)
+    return await moviesRepo.save(payload)
 }
 
-const readMovie = async (): Promise<Movie[]> => {
-    const repo: Repository<Movie> = AppDataSource.getRepository(Movie)
-    return await repo.find();
+const readMovie = async ({page, perPage, sort, order, prevPage, nextPage}: PaginationParams) => {
+    
+    const [movies, count]: Array<MovieRead | number> = await moviesRepo.findAndCount({
+        order: { [sort]: order },
+        skip: page,
+        take: perPage,
+    });
+
+    return {
+        prevPage: page <= 1 ? null : prevPage,
+        nextPage: count - page <= perPage ? null : nextPage,
+        count,
+        data: movies
+    }
 }
 
 const updateMovie = async (movie: Movie, payload: MovieUpdate ): Promise<Movie> => {
-    const repo: Repository<Movie> = AppDataSource.getRepository(Movie)
-    return await repo.save({...movie, ...payload});
+    return await moviesRepo.save({...movie, ...payload});
 }
 
 const deleteMovie = async (payload: Movie): Promise<void> => {
-    const repo: Repository<Movie> = AppDataSource.getRepository(Movie)
-    await repo.remove(payload)
+    await moviesRepo.remove(payload)
 }
 
 export default { createMovie, readMovie, updateMovie, deleteMovie }

@@ -1,5 +1,6 @@
+import "express-async-errors"
 import app from './app';
-import { AppDataSource } from './data_source';
+import { AppDataSource } from './data-source';
 
 AppDataSource.initialize().then((): void => {
     console.log('Database connected.');

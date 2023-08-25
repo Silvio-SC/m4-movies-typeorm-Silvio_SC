@@ -1,4 +1,5 @@
 import "reflect-metadata"
+import "express-async-errors"
 import "dotenv/config"
 import express, { Application } from 'express';
 import { moviesRouter } from "./routers";
